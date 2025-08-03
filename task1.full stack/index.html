@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Weather Forecast - LearnHub</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --dark: #192524;
+      --deep-teal: #3C5759;
+      --sage: #959D90;
+      --mint: #D1EBDB;
+      --light-gray: #D0D5CE;
+      --beige: #EFECE9;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background-color: var(--beige);
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-position: center;
+      transition: background-image 0.5s ease;
+    }
+
+    main {
+      flex: 1;
+    }
+  </style>
+</head>
+
+<body class="text-[var(--dark)]">
+  <header class="bg-[var(--mint)] shadow p-4 flex justify-between items-center rounded-b-2xl">
+    <h1 class="text-2xl font-bold">LearnHub Weather</h1>
+  </header>
+
+  <main class="px-6 py-10 max-w-xl mx-auto text-center">
+    <h2 class="text-3xl font-semibold mb-6">Today's Weather</h2>
+
+    <!-- City input -->
+    <div class="mb-6">
+      <label for="cityInput" class="block text-lg font-medium mb-2">Enter City Name</label>
+      <div class="flex justify-center gap-2">
+        <input
+          type="text"
+          id="cityInput"
+          placeholder="e.g., Mumbai"
+          class="px-4 py-2 rounded-md border border-gray-300 w-2/3 focus:outline-none focus:ring focus:border-[var(--deep-teal)]"
+        />
+        <button
+          onclick="getWeatherByCity()"
+          class="bg-[var(--deep-teal)] text-white px-4 py-2 rounded hover:bg-[var(--dark)] transition"
+        >
+          Get Weather
+        </button>
+      </div>
+    </div>
+
+    <!-- Weather Forecast Card -->
+    <div id="weatherCard" class="bg-[var(--light-gray)] bg-opacity-90 backdrop-blur-md rounded-xl shadow p-6 border border-[var(--sage)]">
+      <h3 class="text-xl font-semibold mb-2 text-[var(--deep-teal)]">Weather Update</h3>
+      <p id="weatherLocation" class="text-sm text-gray-700"></p>
+      <p id="weatherTemp" class="text-sm text-gray-600"></p>
+      <p id="weatherDesc" class="text-sm text-gray-600"></p>
+    </div>
+  </main>
+
+  <footer class="py-4 bg-[var(--mint)] text-center text-sm text-[var(--deep-teal)] rounded-t-2xl">
+    © 2025 LearnHub. All rights reserved.
+  </footer>
+
+  <script>
+    async function getWeatherByCity() {
+      const city = document.getElementById("cityInput").value.trim();
+      if (!city) {
+        alert("Please enter a city name.");
+        return;
+      }
+
+      try {
+        const res = await fetch(`https://wttr.in/${city}?format=j1`);
+        const data = await res.json();
+
+        const location = data.nearest_area[0].areaName[0].value;
+        const temp = data.current_condition[0].temp_C + '°C';
+        const feelsLike = data.current_condition[0].FeelsLikeC + '°C';
+        const desc = data.current_condition[0].weatherDesc[0].value;
+
+        document.getElementById("weatherLocation").textContent = "Location: " + location;
+        document.getElementById("weatherTemp").textContent = "Temperature: " + temp;
+        document.getElementById("weatherDesc").textContent = "Condition: " + desc + " | Feels like: " + feelsLike;
+
+        // 🌆 Background image using Unsplash fallback (no API key)
+        const imageUrl = `https://source.unsplash.com/1600x900/?${city},${desc}`;
+        document.body.style.backgroundImage = `url('${imageUrl}')`;
+      } catch (error) {
+        document.getElementById("weatherCard").innerHTML = "<p class='text-red-600'>Failed to load weather data for that city.</p>";
+        console.error("Weather API error:", error);
+      }
+    }
+
+    // Enable Enter key to trigger weather fetch
+    document.getElementById("cityInput").addEventListener("keydown", function (event) {
+      if (event.key === "Enter") {
+        getWeatherByCity();
+      }
+    });
+  </script>
+</body>
+</html>
